@@ -16,24 +16,29 @@ QQQJA 483`
 	hands := parseInput(input)
 	expected := []Hand{
 		{
-			values: []int{ranks["onepair"] + values['3'], values['K'], values['T'], values['2']},
-			bid:    765,
+			rank: ranks["onepair"],
+			bid:  765,
+			hand: "32T3K",
 		},
 		{
-			values: []int{ranks["twopair"] + values['J'], values['T'], values['K']},
-			bid:    220,
+			rank: ranks["twopair"],
+			bid:  220,
+			hand: "KTJJT",
 		},
 		{
-			values: []int{ranks["twopair"] + values['K'], values['7'], values['6']},
-			bid:    28,
+			rank: ranks["twopair"],
+			bid:  28,
+			hand: "KK677",
 		},
 		{
-			values: []int{ranks["threeofakind"] + values['5'], values['J'], values['T']},
-			bid:    684,
+			rank: ranks["threeofakind"],
+			bid:  684,
+			hand: "T55J5",
 		},
 		{
-			values: []int{ranks["threeofakind"] + values['Q'], values['A'], values['J']},
-			bid:    483,
+			rank: ranks["threeofakind"],
+			bid:  483,
+			hand: "QQQJA",
 		},
 	}
 
@@ -48,7 +53,11 @@ func isEqualHand(a Hand, b Hand) bool {
 		return false
 	}
 
-	if !slices.Equal(a.values, b.values) {
+	if a.rank != b.rank {
+		return false
+	}
+
+	if a.hand != b.hand {
 		return false
 	}
 
@@ -66,24 +75,24 @@ func TestBullshitSorting(t *testing.T) {
 	hands := parseInput(input)
 	expected := []Hand{
 		{
-			values: []int{ranks["fullhouse"] + values['7'], values['8']},
-			bid:    1,
-			hand:   "77788",
+			rank: ranks["fullhouse"],
+			bid:  1,
+			hand: "77788",
 		},
 		{
-			values: []int{ranks["fullhouse"] + values['8'], values['7']},
-			bid:    2,
-			hand:   "77888",
+			rank: ranks["fullhouse"],
+			bid:  2,
+			hand: "77888",
 		},
 		{
-			values: []int{ranks["fourofakind"] + values['A'], values['2']},
-			bid:    3,
-			hand:   "2AAAA",
+			rank: ranks["fourofakind"],
+			bid:  3,
+			hand: "2AAAA",
 		},
 		{
-			values: []int{ranks["fourofakind"] + values['3'], values['2']},
-			bid:    4,
-			hand:   "33332",
+			rank: ranks["fourofakind"],
+			bid:  4,
+			hand: "33332",
 		},
 	}
 
@@ -92,51 +101,101 @@ func TestBullshitSorting(t *testing.T) {
 	}
 }
 
-func TestParseHand(t *testing.T) {
+func TestParseRank(t *testing.T) {
 	testCases := []struct {
 		input    string
-		expected []int
+		expected int
 	}{
 		{
 			"QQQQQ",
-			[]int{ranks["fiveofakind"] + values['Q']},
+			ranks["fiveofakind"],
 		},
 		{
 			"8888T",
-			[]int{ranks["fourofakind"] + values['8'], values['T']},
+			ranks["fourofakind"],
 		},
 		{
 			"TT444",
-			[]int{ranks["fullhouse"] + values['4'], values['T']},
+			ranks["fullhouse"],
 		},
 		{
 			"32T3K",
-			[]int{ranks["onepair"] + values['3'], values['K'], values['T'], values['2']},
+			ranks["onepair"],
 		},
 		{
 			"T55J5",
-			[]int{ranks["threeofakind"] + values['5'], values['J'], values['T']},
+			ranks["threeofakind"],
 		},
 		{
 			"KTJJT",
-			[]int{ranks["twopair"] + values['J'], values['T'], values['K']},
+			ranks["twopair"],
 		},
 		{
 			"KK677",
-			[]int{ranks["twopair"] + values['K'], values['7'], values['6']},
+			ranks["twopair"],
 		},
 		{
 			"QQQJA",
-			[]int{ranks["threeofakind"] + values['Q'], values['A'], values['J']},
+			ranks["threeofakind"],
 		},
 		{
 			"23456",
-			[]int{ranks["highcard"] + values['6'], values['5'], values['4'], values['3'], values['2']},
+			ranks["highcard"],
 		},
 	}
 	for _, tc := range testCases {
-		parsed := parseHand(tc.input)
-		if !slices.Equal(parsed, tc.expected) {
+		parsed := parseRank(tc.input)
+		if parsed != tc.expected {
+			t.Error("test failed", parsed, tc)
+		}
+	}
+}
+
+func TestParseRankWithJokers(t *testing.T) {
+	testCases := []struct {
+		input    string
+		expected int
+	}{
+		{
+			"QQQQQ",
+			ranks["fiveofakind"],
+		},
+		{
+			"8888T",
+			ranks["fourofakind"],
+		},
+		{
+			"TJ444",
+			ranks["fourofakind"],
+		},
+		{
+			"32TJK",
+			ranks["onepair"],
+		},
+		{
+			"T55J5",
+			ranks["fourofakind"],
+		},
+		{
+			"KTJJT",
+			ranks["fourofakind"],
+		},
+		{
+			"KK677",
+			ranks["twopair"],
+		},
+		{
+			"QQQJA",
+			ranks["fourofakind"],
+		},
+		{
+			"23456",
+			ranks["highcard"],
+		},
+	}
+	for _, tc := range testCases {
+		parsed := parseRankWithJokers(tc.input)
+		if parsed != tc.expected {
 			t.Error("test failed", parsed, tc)
 		}
 	}
