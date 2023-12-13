@@ -39,6 +39,40 @@ func TestFindHashes(t *testing.T) {
 	}
 }
 
+func TestMarkSpace(t *testing.T) {
+	input := strings.TrimSpace(`
+...#......
+.......#..
+#.........
+..........
+......#...
+.#........
+.........#
+..........
+.......#..
+#...#.....
+`)
+
+	expected := strings.TrimSpace(`
+..x#.x..x.
+..x..x.#x.
+#.x..x..x.
+xxxxxxxxxx
+..x..x#.x.
+.#x..x..x.
+..x..x..x#
+xxxxxxxxxx
+..x..x.#x.
+#.x.#x..x.
+`)
+
+	marked := markSpaces(input)
+
+	if marked != expected {
+		t.Error("testfailed", "\n", marked, "\n", expected)
+	}
+}
+
 func TestExpandSpace(t *testing.T) {
 	input := strings.TrimSpace(`
 ...#......

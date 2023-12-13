@@ -32,8 +32,20 @@ func part1(content string) {
 }
 
 func part2(content string) {
+	space := markSpaces(content)
+	points := findHashes(space)
+	pairs := combinations(points)
 
-	fmt.Println("Part 2", "???")
+	sum := 0
+	rows := strings.Split(space, "\n")
+	for _, pair := range pairs {
+		a := pair[0]
+		b := pair[1]
+		distance := calculateDistance(rows, a, b)
+		sum += distance
+	}
+
+	fmt.Println("Part 2", sum)
 }
 
 type Point struct {
@@ -52,6 +64,29 @@ func findHashes(content string) []Point {
 		}
 	}
 	return points
+}
+
+func calculateDistance(space []string, a Point, b Point) int {
+	path := ""
+	minRow := int(math.Min(float64(a.row), float64(b.row)))
+	maxRow := int(math.Max(float64(a.row), float64(b.row)))
+	minColumn := int(math.Min(float64(a.column), float64(b.column)))
+	maxColumn := int(math.Max(float64(a.column), float64(b.column)))
+
+	// traverse vertically, not covering last row
+	for i := minRow + 1; i <= maxRow; i++ {
+		path += string(space[i][minColumn])
+	}
+
+	// traverse horizontally, including the "corner"
+	for i := minColumn + 1; i <= maxColumn; i++ {
+		path += string(space[maxRow][i])
+	}
+
+	crosses := strings.Count(path, "x")
+	dots := len(path) - crosses
+
+	return dots + crosses*1000000
 }
 
 func expandSpace(content string) string {
@@ -78,6 +113,29 @@ func expandSpace(content string) string {
 	}
 
 	rows = transpose(expandedColumns)
+	return strings.Join(rows, "\n")
+}
+
+func markSpaces(content string) string {
+
+	// replace empty rows with x
+	rows := strings.Split(content, "\n")
+	for i, row := range rows {
+		if strings.Count(row, "#") == 0 {
+			rows[i] = strings.ReplaceAll(row, ".", "x")
+		}
+	}
+
+	columns := transpose(rows)
+
+	// replace empty columns with x
+	for i, column := range columns {
+		if strings.Count(column, "#") == 0 {
+			columns[i] = strings.ReplaceAll(column, ".", "x")
+		}
+	}
+
+	rows = transpose(columns)
 	return strings.Join(rows, "\n")
 }
 
